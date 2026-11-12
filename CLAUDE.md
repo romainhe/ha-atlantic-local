@@ -13,7 +13,7 @@ See README "Protocole". The traps:
 
 ## Mapping new ids
 
-Ids were found by scanning reads (`CMD 1`) and diffing snapshots while changing the heater by hand. The heater lives in blocks 4000–4199. Mode ids are not mapped yet; map them the same way before exposing presets / HVAC off.
+Ids were found by scanning reads (`CMD 1`) and diffing snapshots while changing the heater by hand. The heater lives in blocks 4000–4199. Mode ids are not mapped yet. `scripts/map_ids.py` (read-only) diffs the heater blocks between manual changes; protocol in `docs/mapping-modes.md`. Once known, set `PRESET_MAP` / `POWER_MAP` (`ModeMap`) in `const.py`: the climate entity derives its presets, HVAC off and turn on/off from them, and writes with the map's typed key. Any new preset name needs a translation under `entity.climate.heater.state_attributes.preset_mode`.
 
 ## Tests
 

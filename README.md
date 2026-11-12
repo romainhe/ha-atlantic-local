@@ -34,7 +34,7 @@ L'intervalle d'interrogation (30 s par défaut) se règle dans **Configurer**.
 | `sensor` Température interne (diagnostic) | ID 4103 |
 | `sensor` Signal Wi-Fi (diagnostic, désactivé par défaut) | ID 822 |
 
-Les modes (arrêt, confort, éco, boost, hors-gel, programme) ne sont pas encore exposés : seul le mode chauffage avec consigne est disponible.
+Les modes (marche/arrêt, confort, éco, boost, hors-gel, programme) sont gérés par le code mais leurs IDs ne sont pas encore cartographiés : tant que `PRESET_MAP` et `POWER_MAP` valent `None` dans `const.py`, seul le mode chauffage avec consigne est exposé. Protocole de cartographie : [`docs/mapping-modes.md`](docs/mapping-modes.md), outil : `scripts/map_ids.py` (lecture seule).
 
 ## Protocole
 

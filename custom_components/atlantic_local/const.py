@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+
 DOMAIN = "atlantic_local"
 
 API_TIMEOUT = 10
@@ -45,3 +47,22 @@ CONF_SCAN_INTERVAL = "scan_interval"
 DEFAULT_SCAN_INTERVAL = 30
 MIN_SCAN_INTERVAL = 10
 MAX_SCAN_INTERVAL = 600
+
+
+@dataclass(frozen=True)
+class ModeMap:
+    """How one enumerated data-model id maps to Home Assistant states."""
+
+    data_id: int
+    values: dict[str, int] = field(default_factory=dict)
+    key: str = "VIU"
+
+
+# Not mapped yet: fill both from a scripts/map_ids.py session
+# (docs/mapping-modes.md). While None, the climate entity only exposes the
+# setpoint.
+# Preset names must have a translation under entity.climate.heater in
+# strings.json. Example: ModeMap(4021, {"comfort": 1, "eco": 2, "program": 4})
+PRESET_MAP: ModeMap | None = None
+# Example: ModeMap(4023, {"on": 1, "off": 0})
+POWER_MAP: ModeMap | None = None

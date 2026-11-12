@@ -20,4 +20,4 @@ Candidats repérés dans le bloc 4000 (valeurs le 2026-11-12, mode programme, 20
 4020=40, 4021=2, 4023=1, 4026=2, 4027=9, 4030=4, 4105=18, 4106=10, 4107=20,
 4108=35, 4123=1, 4124=42, 4125=6, 4133=15, 4134=60, 4138=120, 4142=50.
 
-Ensuite : vérifier par une écriture test (avec accord) que l'id de mode s'écrit avec sa clé typée, puis exposer `preset_modes` et `HVACMode.OFF` dans `climate.py`.
+Ensuite : vérifier par une écriture test (avec accord) que l'id de mode s'écrit avec sa clé typée, puis renseigner `PRESET_MAP` et `POWER_MAP` dans `const.py` (le reste est déjà câblé et testé).

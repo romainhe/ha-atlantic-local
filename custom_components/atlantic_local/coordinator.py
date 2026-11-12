@@ -20,6 +20,9 @@ from .const import (
     ID_TARGET_TEMPERATURE,
     ID_WIFI_RSSI,
     POLLED_IDS,
+    POWER_MAP,
+    PRESET_MAP,
+    ModeMap,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,9 +45,16 @@ class AtlanticState:
     min_temperature: float | None
     max_temperature: float | None
     wifi_rssi: int | None
+    preset: str | None = None
+    power: str | None = None
 
     @classmethod
-    def from_values(cls, values: dict[int, Value]) -> AtlanticState:
+    def from_values(
+        cls,
+        values: dict[int, Value],
+        preset_map: ModeMap | None = None,
+        power_map: ModeMap | None = None,
+    ) -> AtlanticState:
         """Build a state from raw data-model values."""
         rssi = values.get(ID_WIFI_RSSI)
         return cls(
@@ -54,7 +64,17 @@ class AtlanticState:
             min_temperature=centi_to_celsius(values.get(ID_MIN_SETPOINT)),
             max_temperature=centi_to_celsius(values.get(ID_MAX_SETPOINT)),
             wifi_rssi=rssi if isinstance(rssi, int) else None,
+            preset=_lookup(preset_map, values),
+            power=_lookup(power_map, values),
         )
+
+
+def _lookup(mode_map: ModeMap | None, values: dict[int, Value]) -> str | None:
+    """Return the name a mode map gives to the value read for its id."""
+    if mode_map is None:
+        return None
+    raw = values.get(mode_map.data_id)
+    return next((name for name, v in mode_map.values.items() if v == raw), None)
 
 
 class AtlanticLocalCoordinator(DataUpdateCoordinator[AtlanticState]):
@@ -71,6 +91,11 @@ class AtlanticLocalCoordinator(DataUpdateCoordinator[AtlanticState]):
         """Initialise the coordinator."""
         self.api = api
         self.identity = identity
+        self.preset_map = PRESET_MAP
+        self.power_map = POWER_MAP
+        self._polled_ids = POLLED_IDS + tuple(
+            m.data_id for m in (PRESET_MAP, POWER_MAP) if m is not None
+        )
         super().__init__(
             hass,
             _LOGGER,
@@ -82,12 +107,19 @@ class AtlanticLocalCoordinator(DataUpdateCoordinator[AtlanticState]):
     async def _async_update_data(self) -> AtlanticState:
         """Read every polled id."""
         try:
-            values = await self.api.async_read_many(POLLED_IDS)
+            values = await self.api.async_read_many(self._polled_ids)
         except AtlanticLocalError as err:
             raise UpdateFailed(str(err)) from err
-        return AtlanticState.from_values(values)
+        return AtlanticState.from_values(values, self.preset_map, self.power_map)
 
     async def async_set_target_temperature(self, temperature: float) -> None:
         """Write a new setpoint and refresh."""
         await self.api.async_write(ID_TARGET_TEMPERATURE, round(temperature * 100))
+        await self.async_request_refresh()
+
+    async def async_set_mode(self, mode_map: ModeMap, name: str) -> None:
+        """Write one named value of a mode map and refresh."""
+        await self.api.async_write(
+            mode_map.data_id, mode_map.values[name], key=mode_map.key
+        )
         await self.async_request_refresh()

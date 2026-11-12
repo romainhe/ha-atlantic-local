@@ -37,7 +37,19 @@
   "entity": {
     "climate": {
       "heater": {
-        "name": "Heater"
+        "name": "Heater",
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "comfort": "Comfort",
+              "eco": "Eco",
+              "boost": "Boost",
+              "frost_protection": "Frost protection",
+              "program": "Program",
+              "away": "Away"
+            }
+          }
+        }
       }
     },
     "sensor": {
@@ -57,7 +69,7 @@
       "message": "The heater refused the new setpoint: {error}"
     },
     "mode_unsupported": {
-      "message": "Only heating mode is supported for now."
+      "message": "This mode is not mapped for this heater yet."
     }
   }
 }
