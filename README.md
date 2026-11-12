@@ -7,6 +7,14 @@ Intégration Home Assistant qui pilote un radiateur ou sèche-serviettes Atlanti
 
 Testée sur un sèche-serviettes **Doris 2000 W** (`TRI TD1W`, firmware module `v1.5.2`).
 
+## État / Statut
+
+Version actuelle : **v0.1** (travail en cours).
+
+- ✅ **Fonctionne** — entité `climate` : lecture et **écriture de la consigne** en local (ID 4118), température ambiante (4104), bornes min/max. Config par IP, traduit FR/EN, 20 tests, CI verte. Contrôle fiable de la consigne sans cloud, contourne le bug Cozytouch #186.
+- 🚧 **Codé mais inactif (en attente des IDs)** — modes marche/arrêt, confort, éco, boost, hors-gel et programme. Déjà câblés dans l'entité ; ils s'activent dès que `PRESET_MAP` et `POWER_MAP` sont renseignés dans `const.py`. Tant qu'ils valent `None`, seul le chauffage avec consigne est exposé. Cartographie des IDs : [`docs/mapping-modes.md`](docs/mapping-modes.md) + `scripts/map_ids.py` (lecture seule) → **v0.2**.
+- ⬜ **À faire** — fixer l'IP du module par un bail DHCP statique sur la box ; installation via HACS et test d'écriture de bout en bout dans Home Assistant.
+
 ## Installation
 
 ### HACS (dépôt custom)
