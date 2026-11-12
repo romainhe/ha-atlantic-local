@@ -1,0 +1,63 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Atlantic heater",
+        "description": "Local IP address of the heater's Wi-Fi module.",
+        "data": {
+          "host": "[%key:common::config_flow::data::host%]"
+        }
+      },
+      "reconfigure": {
+        "title": "Atlantic heater",
+        "description": "New local IP address of the heater's Wi-Fi module.",
+        "data": {
+          "host": "[%key:common::config_flow::data::host%]"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]"
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+      "reconfigure_successful": "[%key:common::config_flow::abort::reconfigure_successful%]",
+      "wrong_device": "This address answers with another heater."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Polling interval"
+        }
+      }
+    }
+  },
+  "entity": {
+    "climate": {
+      "heater": {
+        "name": "Heater"
+      }
+    },
+    "sensor": {
+      "room_temperature": {
+        "name": "Room temperature"
+      },
+      "internal_temperature": {
+        "name": "Internal temperature"
+      },
+      "wifi_rssi": {
+        "name": "Wi-Fi signal"
+      }
+    }
+  },
+  "exceptions": {
+    "write_failed": {
+      "message": "The heater refused the new setpoint: {error}"
+    },
+    "mode_unsupported": {
+      "message": "Only heating mode is supported for now."
+    }
+  }
+}

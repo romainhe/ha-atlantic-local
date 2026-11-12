@@ -1,0 +1,21 @@
+name: HACS validation
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 4 * * *"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hacs/action@main
+        with:
+          category: integration
+          # The brands check requires the integration to be listed in
+          # home-assistant/brands, which only applies to the HACS default
+          # store. Installing this repository as a HACS custom repository
+          # does not need it.
+          ignore: brands

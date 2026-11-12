@@ -1,0 +1,13 @@
+{
+  "domain": "atlantic_local",
+  "name": "Atlantic local",
+  "codeowners": ["@romainhe"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/romainhe/ha-atlantic-local",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/romainhe/ha-atlantic-local/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

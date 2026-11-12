@@ -1,0 +1,63 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Radiateur Atlantic",
+        "description": "Adresse IP locale du module Wi-Fi du radiateur.",
+        "data": {
+          "host": "Hôte"
+        }
+      },
+      "reconfigure": {
+        "title": "Radiateur Atlantic",
+        "description": "Nouvelle adresse IP locale du module Wi-Fi du radiateur.",
+        "data": {
+          "host": "Hôte"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Échec de connexion"
+    },
+    "abort": {
+      "already_configured": "L'appareil est déjà configuré",
+      "reconfigure_successful": "La reconfiguration a réussi",
+      "wrong_device": "Cette adresse répond avec un autre radiateur."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Intervalle d'interrogation"
+        }
+      }
+    }
+  },
+  "entity": {
+    "climate": {
+      "heater": {
+        "name": "Radiateur"
+      }
+    },
+    "sensor": {
+      "room_temperature": {
+        "name": "Température ambiante"
+      },
+      "internal_temperature": {
+        "name": "Température interne"
+      },
+      "wifi_rssi": {
+        "name": "Signal Wi-Fi"
+      }
+    }
+  },
+  "exceptions": {
+    "write_failed": {
+      "message": "Le radiateur a refusé la nouvelle consigne : {error}"
+    },
+    "mode_unsupported": {
+      "message": "Seul le mode chauffage est pris en charge pour l'instant."
+    }
+  }
+}
