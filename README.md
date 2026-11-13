@@ -9,7 +9,7 @@ Testée sur un sèche-serviettes **Doris 2000 W** (`TRI TD1W`, firmware module `
 
 ## État / Statut
 
-Version actuelle : **v0.2**.
+Version actuelle : **v0.2.1**.
 
 - ✅ **Fonctionne** — consigne (ID 4118), marche/arrêt (4015), boost avec type (serviette seule ou + ventilation) et durée réglables, heure de fin du boost, compteur d'énergie interne (tableau Énergie sans cloud) et puissance de chauffe. Tous les IDs ont été validés par écriture sur le radiateur. Config par IP, traduit FR/EN, CI verte. Contrôle sans cloud, contourne le bug Cozytouch #186.
 - ⬜ **Non géré** — programmation hebdomadaire (IDs 4126–4132 lus mais non exposés).
