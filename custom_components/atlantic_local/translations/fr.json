@@ -48,17 +48,23 @@
         }
       }
     },
-    "number": {
-      "boost_duration": {
-        "name": "Durée du boost"
-      }
-    },
     "select": {
       "boost_type": {
         "name": "Type de boost",
         "state": {
           "towel": "Serviette",
           "towel_fan": "Serviette + ventilation"
+        }
+      },
+      "boost_duration": {
+        "name": "Durée du boost",
+        "state": {
+          "5": "5 min",
+          "10": "10 min",
+          "15": "15 min",
+          "20": "20 min",
+          "25": "25 min",
+          "30": "30 min"
         }
       }
     },

@@ -13,7 +13,7 @@ Le Doris n'expose que marche/arrêt, consigne et boost : pas de confort / éco /
 | 4118 | Consigne (`VIS`) | centièmes de °C | ✅ |
 | 4044 | Boost | 1 = lancer, 0 = arrêter | ✅ effet immédiat |
 | 4045 | Type de boost | 0 = serviette seule, 1 = serviette + ventilation | ✅ pris en compte à chaud |
-| 4046 | Durée du boost | minutes, paliers de 5 | ✅ lue **au lancement** seulement : la changer pendant un boost ne décale pas la fin ; relancer (4044 = 0 puis 1) pour l'appliquer |
+| 4046 | Durée du boost | minutes, 5 à 30 par paliers de 5 | ✅ lue **au lancement** seulement : la changer pendant un boost ne décale pas la fin ; relancer (4044 = 0 puis 1) pour l'appliquer |
 | 4048 | Fin du boost | horodatage, 0 hors boost | lecture seule : calculé par le radiateur (l'écrire ne lance rien) |
 
 4048 contient l'heure **locale** encodée comme un epoch UTC : 1794571834 = 2026-11-13 12:10:34 heure de Paris. Éteindre le radiateur coupe le boost en cours.

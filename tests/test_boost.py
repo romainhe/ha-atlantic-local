@@ -14,11 +14,6 @@ from homeassistant.components.climate import (
     HVACMode,
 )
 from homeassistant.components.climate import DOMAIN as CLIMATE_DOMAIN
-from homeassistant.components.number import (
-    ATTR_VALUE,
-    SERVICE_SET_VALUE,
-)
-from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
 from homeassistant.components.select import (
     ATTR_OPTION,
     SERVICE_SELECT_OPTION,
@@ -33,7 +28,7 @@ from tests.fake_module import FakeModule
 
 CLIMATE = "climate.salle_de_bain"
 BOOST_TYPE = "select.salle_de_bain_boost_type"
-BOOST_DURATION = "number.salle_de_bain_boost_duration"
+BOOST_DURATION = "select.salle_de_bain_boost_duration"
 BOOST_END = "sensor.salle_de_bain_boost_end"
 # Read on the heater after a 25 min boost started at 11:45:34 Paris time.
 BOOST_END_RAW = 1794571834
@@ -130,19 +125,25 @@ async def test_boost_type_select(hass, module):
     assert hass.states.get(BOOST_TYPE).state == "towel"
 
 
-async def test_boost_duration_number(hass, module):
+async def test_boost_duration_select(hass, module):
     await _setup(hass)
     state = hass.states.get(BOOST_DURATION)
     assert state.state == "30"
-    assert state.attributes["step"] == 5
+    assert state.attributes["options"] == ["5", "10", "15", "20", "25", "30"]
     await _call(
         hass,
-        NUMBER_DOMAIN,
-        SERVICE_SET_VALUE,
-        {ATTR_ENTITY_ID: BOOST_DURATION, ATTR_VALUE: 15},
+        SELECT_DOMAIN,
+        SERVICE_SELECT_OPTION,
+        {ATTR_ENTITY_ID: BOOST_DURATION, ATTR_OPTION: "15"},
     )
     assert {"CMD": 3, "SN": 13, "ID": 4046, "VIU": 15} in module.requests
     assert hass.states.get(BOOST_DURATION).state == "15"
+
+
+async def test_boost_duration_outside_steps_is_unknown(hass, module):
+    module.values[4046] = ("VIU", 45)
+    await _setup(hass)
+    assert hass.states.get(BOOST_DURATION).state == STATE_UNKNOWN
 
 
 async def test_boost_end_sensor(hass, module):

@@ -41,7 +41,7 @@ L'intervalle d'interrogation (30 s par défaut) se règle dans **Configurer**.
 | `climate` — modes Chauffe / Arrêt | ID 4015 (4 = marche, 0 = arrêt) |
 | `climate` — preset Boost / Aucun | ID 4044 (1 = lancer, 0 = arrêter) |
 | `select` Type de boost — Serviette / Serviette + ventilation (configuration) | ID 4045 |
-| `number` Durée du boost, 5 à 60 min par pas de 5 (configuration) | ID 4046 |
+| `select` Durée du boost — 5, 10, 15, 20, 25 ou 30 min, comme sur le radiateur (configuration) | ID 4046 |
 | `climate` — action Chauffe / Inactif / Arrêt | ID 8503 > 0 = chauffe |
 | `sensor` Fin du boost (horodatage, inconnu hors boost) | ID 4048 |
 | `sensor` Énergie — compteur interne du radiateur, kWh, `total_increasing` (tableau Énergie) | ID 4041 (Wh) |
