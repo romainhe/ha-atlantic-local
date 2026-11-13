@@ -15,6 +15,7 @@ DEFAULT_VALUES: dict[int, tuple[str, Any]] = {
     822: ("VIS", -46),
     4015: ("VIU", 4),
     4019: ("VS", "Salle de bain"),
+    4041: ("VIU", 496273),
     4044: ("VIU", 0),
     4045: ("VIU", 1),
     4046: ("VIU", 30),
@@ -24,6 +25,7 @@ DEFAULT_VALUES: dict[int, tuple[str, Any]] = {
     4110: ("VIS", 700),
     4111: ("VIS", 2800),
     4118: ("VIS", 2000),
+    8503: ("VIU", 20),
 }
 
 

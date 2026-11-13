@@ -74,6 +74,12 @@
       },
       "boost_end": {
         "name": "Boost end"
+      },
+      "energy": {
+        "name": "Energy"
+      },
+      "heating_demand": {
+        "name": "Heating demand"
       }
     }
   },

@@ -172,3 +172,31 @@ async def test_local_epoch_is_local_wall_clock(hass):
     )
     assert local_epoch_to_datetime(0) is None
     assert local_epoch_to_datetime(None) is None
+
+
+async def test_energy_counter_in_kwh(hass, module):
+    await _setup(hass)
+    state = hass.states.get("sensor.salle_de_bain_energy")
+    assert float(state.state) == pytest.approx(496.273)
+    assert state.attributes["unit_of_measurement"] == "kWh"
+    assert state.attributes["state_class"] == "total_increasing"
+
+
+async def test_heating_demand_drives_hvac_action(hass, module):
+    await _setup(hass)
+    assert hass.states.get("sensor.salle_de_bain_heating_demand").state == "20"
+    assert hass.states.get(CLIMATE).attributes["hvac_action"] == "heating"
+
+    module.values[8503] = ("VIU", 0)
+    entry = hass.config_entries.async_entries(DOMAIN)[0]
+    await entry.runtime_data.coordinator.async_refresh()
+    await hass.async_block_till_done()
+    assert hass.states.get(CLIMATE).attributes["hvac_action"] == "idle"
+
+    await _call(
+        hass,
+        CLIMATE_DOMAIN,
+        SERVICE_SET_HVAC_MODE,
+        {ATTR_ENTITY_ID: CLIMATE, "hvac_mode": HVACMode.OFF},
+    )
+    assert hass.states.get(CLIMATE).attributes["hvac_action"] == "off"

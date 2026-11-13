@@ -18,6 +18,8 @@ from .const import (
     DOMAIN,
     ID_BOOST_DURATION,
     ID_BOOST_END,
+    ID_ENERGY,
+    ID_HEATING_DEMAND,
     ID_INTERNAL_TEMPERATURE,
     ID_MAX_SETPOINT,
     ID_MIN_SETPOINT,
@@ -67,6 +69,8 @@ class AtlanticState:
     boost_type: str | None = None
     boost_duration: int | None = None
     boost_end: datetime | None = None
+    energy: int | None = None
+    heating_demand: int | None = None
 
     @classmethod
     def from_values(
@@ -78,6 +82,8 @@ class AtlanticState:
         """Build a state from raw data-model values."""
         rssi = values.get(ID_WIFI_RSSI)
         duration = values.get(ID_BOOST_DURATION)
+        energy = values.get(ID_ENERGY)
+        demand = values.get(ID_HEATING_DEMAND)
         return cls(
             target_temperature=centi_to_celsius(values.get(ID_TARGET_TEMPERATURE)),
             room_temperature=centi_to_celsius(values.get(ID_ROOM_TEMPERATURE)),
@@ -90,6 +96,8 @@ class AtlanticState:
             boost_type=_lookup(BOOST_TYPE_MAP, values),
             boost_duration=duration if isinstance(duration, int) else None,
             boost_end=local_epoch_to_datetime(values.get(ID_BOOST_END)),
+            energy=energy if isinstance(energy, int) else None,
+            heating_demand=demand if isinstance(demand, int) else None,
         )
 
 

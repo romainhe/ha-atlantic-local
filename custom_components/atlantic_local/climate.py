@@ -7,6 +7,7 @@ from typing import Any
 from homeassistant.components.climate import (
     ClimateEntity,
     ClimateEntityFeature,
+    HVACAction,
     HVACMode,
 )
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
@@ -82,6 +83,16 @@ class AtlanticLocalClimate(AtlanticLocalEntity, ClimateEntity):
         if self.coordinator.data.power == POWER_OFF:
             return HVACMode.OFF
         return HVACMode.HEAT
+
+    @property
+    def hvac_action(self) -> HVACAction | None:
+        """Return whether the heater is drawing power right now."""
+        data = self.coordinator.data
+        if data.power == POWER_OFF:
+            return HVACAction.OFF
+        if data.heating_demand is None:
+            return None
+        return HVACAction.HEATING if data.heating_demand > 0 else HVACAction.IDLE
 
     @property
     def preset_mode(self) -> str | None:

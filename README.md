@@ -11,7 +11,7 @@ Testée sur un sèche-serviettes **Doris 2000 W** (`TRI TD1W`, firmware module `
 
 Version actuelle : **v0.2**.
 
-- ✅ **Fonctionne** — consigne (ID 4118), marche/arrêt (4015), boost avec type (serviette seule ou + ventilation) et durée réglables, heure de fin du boost. Tous les IDs ont été validés par écriture sur le radiateur. Config par IP, traduit FR/EN, CI verte. Contrôle sans cloud, contourne le bug Cozytouch #186.
+- ✅ **Fonctionne** — consigne (ID 4118), marche/arrêt (4015), boost avec type (serviette seule ou + ventilation) et durée réglables, heure de fin du boost, compteur d'énergie interne (tableau Énergie sans cloud) et puissance de chauffe. Tous les IDs ont été validés par écriture sur le radiateur. Config par IP, traduit FR/EN, CI verte. Contrôle sans cloud, contourne le bug Cozytouch #186.
 - ⬜ **Non géré** — programmation hebdomadaire (IDs 4126–4132 lus mais non exposés).
 - ⬜ **À faire** — fixer l'IP du module par un bail DHCP statique sur la box ; installation via HACS et test de bout en bout dans Home Assistant.
 
@@ -42,7 +42,10 @@ L'intervalle d'interrogation (30 s par défaut) se règle dans **Configurer**.
 | `climate` — preset Boost / Aucun | ID 4044 (1 = lancer, 0 = arrêter) |
 | `select` Type de boost — Serviette / Serviette + ventilation (configuration) | ID 4045 |
 | `number` Durée du boost, 5 à 60 min par pas de 5 (configuration) | ID 4046 |
+| `climate` — action Chauffe / Inactif / Arrêt | ID 8503 > 0 = chauffe |
 | `sensor` Fin du boost (horodatage, inconnu hors boost) | ID 4048 |
+| `sensor` Énergie — compteur interne du radiateur, kWh, `total_increasing` (tableau Énergie) | ID 4041 (Wh) |
+| `sensor` Puissance de chauffe — % de la puissance demandée par la régulation | ID 8503 |
 | `sensor` Température ambiante | ID 4104 |
 | `sensor` Température interne (diagnostic) | ID 4103 |
 | `sensor` Signal Wi-Fi (diagnostic, désactivé par défaut) | ID 822 |
@@ -90,6 +93,7 @@ Les températures sont en centièmes de degré. Les IDs locaux n'ont rien à voi
 | 822 | RSSI Wi-Fi (dBm) |
 | 4015 | Marche / arrêt (4 / 0) — 4030 et 4083 en sont des miroirs, à ne pas écrire |
 | 4019 | Nom de la pièce |
+| 4041 | Énergie consommée, Wh cumulés (même compteur que la conso cloud Atlantic) |
 | 4044 | Boost (1 / 0) |
 | 4045 | Type de boost (0 serviette, 1 + ventilation) |
 | 4046 | Durée du boost (min) |
@@ -100,6 +104,7 @@ Les températures sont en centièmes de degré. Les IDs locaux n'ont rien à voi
 | 4110 / 4111 | Consigne min / max |
 | 4118 | Consigne |
 | 4120, 4135, 4141 | Consigne confort du programme (probable) |
+| 8503 | Puissance de chauffe demandée (%) |
 | 4126 – 4132 | Programme hebdomadaire : paires minute de début / consigne |
 
 ## Développement

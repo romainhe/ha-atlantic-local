@@ -24,7 +24,8 @@ Le Doris n'expose que marche/arrêt, consigne et boost : pas de confort / éco /
 |---|---|
 | 4039, 4090 | Passent à 1 avec le boost ; 4090 passe aussi à 1 sur toute action manuelle (dérogation), y compris à l'arrêt |
 | 8504 / 8524 | Sorties serviette / ventilation (1 = active) |
-| 8503, 4091 | Puissance demandée (%, ×100 pour 4091) : sortie de régulation, pas un état de boost |
+| 4041 | Énergie cumulée en Wh : +139 Wh en 4 min de boost à 2 kW, plat à l'arrêt ; égale à la conso cloud Atlantic (496,344 kWh à 11:06 entre 496273 et 496412 lus à 11:03 et 11:07) |
+| 8503, 4091 | Puissance demandée (%, ×100 pour 4091) : sortie de régulation, pas un état de boost. 8503 alimente `hvac_action` et le sensor Puissance de chauffe |
 | 4047 | 30, inchangé dans tous les relevés : rôle inconnu |
 
 ## Refaire une cartographie

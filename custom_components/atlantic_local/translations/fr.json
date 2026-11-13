@@ -74,6 +74,12 @@
       },
       "boost_end": {
         "name": "Fin du boost"
+      },
+      "energy": {
+        "name": "Énergie"
+      },
+      "heating_demand": {
+        "name": "Puissance de chauffe"
       }
     }
   },
