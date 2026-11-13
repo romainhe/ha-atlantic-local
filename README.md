@@ -39,7 +39,8 @@ L'intervalle d'interrogation (30 s par défaut) se règle dans **Configurer**.
 |---|---|
 | `climate` — consigne, température ambiante, bornes min/max | IDs 4118, 4104, 4110, 4111 |
 | `climate` — modes Chauffe / Arrêt | ID 4015 (4 = marche, 0 = arrêt) |
-| `climate` — preset Boost / Aucun | ID 4044 (1 = lancer, 0 = arrêter) |
+| `climate` — préréglage Aucun / Boost 5 … 30 min : lance le boost avec cette durée (relance un boost en cours pour appliquer la nouvelle durée) | IDs 4046 puis 4044 |
+| `climate` — mode de ventilation = type de boost : Serviette / Serviette + ventilation | ID 4045 |
 | `select` Type de boost — Serviette / Serviette + ventilation (configuration) | ID 4045 |
 | `select` Durée du boost — 5, 10, 15, 20, 25 ou 30 min, comme sur le radiateur (configuration) | ID 4046 |
 | `climate` — action Chauffe / Inactif / Arrêt | ID 8503 > 0 = chauffe |
@@ -50,7 +51,7 @@ L'intervalle d'interrogation (30 s par défaut) se règle dans **Configurer**.
 | `sensor` Température interne (diagnostic) | ID 4103 |
 | `sensor` Signal Wi-Fi (diagnostic, désactivé par défaut) | ID 822 |
 
-La durée du boost n'est lue par le radiateur qu'au lancement : la modifier pendant un boost ne change pas son heure de fin. Pour l'appliquer tout de suite, repasser le preset sur Aucun puis Boost. Le type, lui, s'applique à chaud. Éteindre le radiateur coupe le boost en cours.
+Durée et type de boost se règlent directement dans la carte thermostat (listes « Préréglage » et « Mode de ventilation ») ; les entités `select` restent pour les automatisations. Le radiateur ne lit la durée qu'au lancement : modifier le `select` Durée pendant un boost ne change pas son heure de fin, alors que choisir un préréglage Boost relance le boost avec la nouvelle durée. Le type, lui, s'applique à chaud. Éteindre le radiateur coupe le boost en cours.
 
 Cartographie complète et pièges : [`docs/mapping-modes.md`](docs/mapping-modes.md).
 

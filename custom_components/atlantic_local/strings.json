@@ -40,9 +40,23 @@
         "name": "Heater",
         "state_attributes": {
           "preset_mode": {
+            "name": "Boost",
             "state": {
               "none": "None",
-              "boost": "Boost"
+              "boost": "Boost",
+              "boost_5": "Boost 5 min",
+              "boost_10": "Boost 10 min",
+              "boost_15": "Boost 15 min",
+              "boost_20": "Boost 20 min",
+              "boost_25": "Boost 25 min",
+              "boost_30": "Boost 30 min"
+            }
+          },
+          "fan_mode": {
+            "name": "Boost type",
+            "state": {
+              "towel": "Towel rail",
+              "towel_fan": "Towel rail + fan"
             }
           }
         }

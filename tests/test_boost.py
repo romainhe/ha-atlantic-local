@@ -63,8 +63,18 @@ async def test_climate_exposes_power_and_boost(hass, module):
     await _setup(hass)
     state = hass.states.get(CLIMATE)
     assert state.attributes[ATTR_HVAC_MODES] == [HVACMode.HEAT, HVACMode.OFF]
-    assert state.attributes[ATTR_PRESET_MODES] == ["none", "boost"]
+    assert state.attributes[ATTR_PRESET_MODES] == [
+        "none",
+        "boost_5",
+        "boost_10",
+        "boost_15",
+        "boost_20",
+        "boost_25",
+        "boost_30",
+    ]
     assert state.attributes[ATTR_PRESET_MODE] == "none"
+    assert state.attributes["fan_modes"] == ["towel", "towel_fan"]
+    assert state.attributes["fan_mode"] == "towel_fan"
 
 
 async def test_power_off_and_on_write_4015(hass, module):
@@ -97,10 +107,14 @@ async def test_boost_preset_starts_and_stops(hass, module):
         hass,
         CLIMATE_DOMAIN,
         SERVICE_SET_PRESET_MODE,
-        {ATTR_ENTITY_ID: CLIMATE, ATTR_PRESET_MODE: "boost"},
+        {ATTR_ENTITY_ID: CLIMATE, ATTR_PRESET_MODE: "boost_20"},
     )
-    assert {"CMD": 3, "SN": 13, "ID": 4044, "VIU": 1} in module.requests
-    assert hass.states.get(CLIMATE).attributes[ATTR_PRESET_MODE] == "boost"
+    writes = [r for r in module.requests if r["CMD"] == 3]
+    assert writes == [
+        {"CMD": 3, "SN": 13, "ID": 4046, "VIU": 20},
+        {"CMD": 3, "SN": 13, "ID": 4044, "VIU": 1},
+    ]
+    assert hass.states.get(CLIMATE).attributes[ATTR_PRESET_MODE] == "boost_20"
 
     await _call(
         hass,
@@ -110,6 +124,37 @@ async def test_boost_preset_starts_and_stops(hass, module):
     )
     assert {"CMD": 3, "SN": 13, "ID": 4044, "VIU": 0} in module.requests
     assert hass.states.get(CLIMATE).attributes[ATTR_PRESET_MODE] == "none"
+
+
+async def test_new_boost_duration_restarts_running_boost(hass, module):
+    module.values[4044] = ("VIU", 1)
+    await _setup(hass)
+    assert hass.states.get(CLIMATE).attributes[ATTR_PRESET_MODE] == "boost_30"
+    await _call(
+        hass,
+        CLIMATE_DOMAIN,
+        SERVICE_SET_PRESET_MODE,
+        {ATTR_ENTITY_ID: CLIMATE, ATTR_PRESET_MODE: "boost_10"},
+    )
+    writes = [r for r in module.requests if r["CMD"] == 3]
+    assert writes == [
+        {"CMD": 3, "SN": 13, "ID": 4046, "VIU": 10},
+        {"CMD": 3, "SN": 13, "ID": 4044, "VIU": 0},
+        {"CMD": 3, "SN": 13, "ID": 4044, "VIU": 1},
+    ]
+    assert hass.states.get(CLIMATE).attributes[ATTR_PRESET_MODE] == "boost_10"
+
+
+async def test_fan_mode_sets_boost_type(hass, module):
+    await _setup(hass)
+    await _call(
+        hass,
+        CLIMATE_DOMAIN,
+        "set_fan_mode",
+        {ATTR_ENTITY_ID: CLIMATE, "fan_mode": "towel"},
+    )
+    assert {"CMD": 3, "SN": 13, "ID": 4045, "VIU": 0} in module.requests
+    assert hass.states.get(CLIMATE).attributes["fan_mode"] == "towel"
 
 
 async def test_boost_type_select(hass, module):

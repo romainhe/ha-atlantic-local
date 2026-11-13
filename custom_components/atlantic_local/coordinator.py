@@ -16,6 +16,7 @@ from .api import AtlanticLocalApi, AtlanticLocalError, DeviceIdentity, Value
 from .const import (
     BOOST_TYPE_MAP,
     DOMAIN,
+    ID_BOOST,
     ID_BOOST_DURATION,
     ID_BOOST_END,
     ID_ENERGY,
@@ -164,6 +165,18 @@ class AtlanticLocalCoordinator(DataUpdateCoordinator[AtlanticState]):
             mode_map.data_id, mode_map.values[name], key=mode_map.key
         )
         await self._async_written(**{field: name})
+
+    async def async_start_boost(self, minutes: int) -> None:
+        """Start a boost of the given length, restarting a running one.
+
+        The heater reads the duration only when a boost starts, so a running
+        boost is stopped and started again to apply a new length.
+        """
+        await self.api.async_write(ID_BOOST_DURATION, minutes, key="VIU")
+        if self.data.preset == "boost":
+            await self.api.async_write(ID_BOOST, 0, key="VIU")
+        await self.api.async_write(ID_BOOST, 1, key="VIU")
+        await self._async_written(boost_duration=minutes, preset="boost")
 
     async def async_set_boost_duration(self, minutes: int) -> None:
         """Write the boost duration, used by the next boost start."""

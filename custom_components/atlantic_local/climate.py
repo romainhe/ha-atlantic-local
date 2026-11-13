@@ -17,7 +17,14 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import AtlanticLocalConfigEntry
 from .api import AtlanticLocalError
-from .const import DEFAULT_MAX_TEMP, DEFAULT_MIN_TEMP, DOMAIN, TEMPERATURE_STEP
+from .const import (
+    BOOST_DURATIONS,
+    BOOST_TYPE_MAP,
+    DEFAULT_MAX_TEMP,
+    DEFAULT_MIN_TEMP,
+    DOMAIN,
+    TEMPERATURE_STEP,
+)
 from .coordinator import AtlanticLocalCoordinator
 from .entity import AtlanticLocalEntity
 
@@ -25,6 +32,9 @@ PARALLEL_UPDATES = 1
 
 POWER_ON = "on"
 POWER_OFF = "off"
+PRESET_NONE = "none"
+PRESET_BOOST = "boost"
+BOOST_PRESET_PREFIX = "boost_"
 
 
 async def async_setup_entry(
@@ -52,9 +62,23 @@ class AtlanticLocalClimate(AtlanticLocalEntity, ClimateEntity):
         if coordinator.power_map is not None:
             self._attr_hvac_modes.append(HVACMode.OFF)
             features |= ClimateEntityFeature.TURN_ON | ClimateEntityFeature.TURN_OFF
-        if coordinator.preset_map is not None:
-            self._attr_preset_modes = list(coordinator.preset_map.values)
+        preset_map = coordinator.preset_map
+        self._boost_presets = (
+            preset_map is not None
+            and PRESET_BOOST in preset_map.values
+            and coordinator.data.boost_duration is not None
+        )
+        if self._boost_presets:
+            self._attr_preset_modes = [PRESET_NONE] + [
+                f"{BOOST_PRESET_PREFIX}{minutes}" for minutes in BOOST_DURATIONS
+            ]
             features |= ClimateEntityFeature.PRESET_MODE
+        elif preset_map is not None:
+            self._attr_preset_modes = list(preset_map.values)
+            features |= ClimateEntityFeature.PRESET_MODE
+        if coordinator.data.boost_type is not None:
+            self._attr_fan_modes = list(BOOST_TYPE_MAP.values)
+            features |= ClimateEntityFeature.FAN_MODE
         self._attr_supported_features = features
 
     @property
@@ -96,8 +120,17 @@ class AtlanticLocalClimate(AtlanticLocalEntity, ClimateEntity):
 
     @property
     def preset_mode(self) -> str | None:
-        """Return the active preset."""
-        return self.coordinator.data.preset
+        """Return the active preset; a running boost is named by its duration."""
+        data = self.coordinator.data
+        if not self._boost_presets or data.preset != PRESET_BOOST:
+            return data.preset
+        preset = f"{BOOST_PRESET_PREFIX}{data.boost_duration}"
+        return preset if preset in self.preset_modes else None
+
+    @property
+    def fan_mode(self) -> str | None:
+        """Return the boost type: towel rail alone or with the fan."""
+        return self.coordinator.data.boost_type
 
     async def _async_guarded(self, coro) -> None:
         try:
@@ -140,8 +173,29 @@ class AtlanticLocalClimate(AtlanticLocalEntity, ClimateEntity):
         """Switch the heater off."""
         await self.async_set_hvac_mode(HVACMode.OFF)
 
+    async def async_set_fan_mode(self, fan_mode: str) -> None:
+        """Write the boost type; the heater applies it to a running boost too."""
+        if fan_mode not in BOOST_TYPE_MAP.values:
+            raise ServiceValidationError(
+                translation_domain=DOMAIN, translation_key="mode_unsupported"
+            )
+        await self._async_guarded(
+            self.coordinator.async_set_mode(BOOST_TYPE_MAP, "boost_type", fan_mode)
+        )
+
     async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Select a preset."""
+        if self._boost_presets and preset_mode in self.preset_modes:
+            if preset_mode == PRESET_NONE:
+                await self._async_guarded(
+                    self.coordinator.async_set_mode(
+                        self.coordinator.preset_map, "preset", PRESET_NONE
+                    )
+                )
+                return
+            minutes = int(preset_mode.removeprefix(BOOST_PRESET_PREFIX))
+            await self._async_guarded(self.coordinator.async_start_boost(minutes))
+            return
         preset_map = self.coordinator.preset_map
         if preset_map is None or preset_mode not in preset_map.values:
             raise ServiceValidationError(
