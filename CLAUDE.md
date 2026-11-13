@@ -13,7 +13,9 @@ See README "Protocole". The traps:
 
 ## Mapping new ids
 
-Ids were found by scanning reads (`CMD 1`) and diffing snapshots while changing the heater by hand. The heater lives in blocks 4000–4199. Mode ids are not mapped yet. `scripts/map_ids.py` (read-only) diffs the heater blocks between manual changes; protocol in `docs/mapping-modes.md`. Once known, set `PRESET_MAP` / `POWER_MAP` (`ModeMap`) in `const.py`: the climate entity derives its presets, HVAC off and turn on/off from them, and writes with the map's typed key. Any new preset name needs a translation under `entity.climate.heater.state_attributes.preset_mode`.
+Ids were found by scanning reads (`CMD 1`) and diffing snapshots while changing the heater by hand. The heater lives in blocks 4000–4199. `scripts/map_ids.py` (read-only) diffs the heater blocks between manual changes; the validated map is in `docs/mapping-modes.md`. `PRESET_MAP` / `POWER_MAP` / `BOOST_TYPE_MAP` (`ModeMap`) in `const.py` drive the climate presets, HVAC off and the boost type select, and write with the map's typed key. Any new preset name needs a translation under `entity.climate.heater.state_attributes.preset_mode`.
+
+Traps found while mapping: power is written on 4015 (writing its mirror 4030 only cancels a boost); the boost duration 4046 is only read when a boost starts; 4048 holds local wall-clock time encoded as a UTC epoch.
 
 ## Tests
 

@@ -117,7 +117,9 @@ class AtlanticLocalClimate(AtlanticLocalEntity, ClimateEntity):
                 translation_domain=DOMAIN, translation_key="mode_unsupported"
             )
         name = POWER_OFF if hvac_mode == HVACMode.OFF else POWER_ON
-        await self._async_guarded(self.coordinator.async_set_mode(power_map, name))
+        await self._async_guarded(
+            self.coordinator.async_set_mode(power_map, "power", name)
+        )
 
     async def async_turn_on(self) -> None:
         """Switch the heater on."""
@@ -135,5 +137,5 @@ class AtlanticLocalClimate(AtlanticLocalEntity, ClimateEntity):
                 translation_domain=DOMAIN, translation_key="mode_unsupported"
             )
         await self._async_guarded(
-            self.coordinator.async_set_mode(preset_map, preset_mode)
+            self.coordinator.async_set_mode(preset_map, "preset", preset_mode)
         )

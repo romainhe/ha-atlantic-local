@@ -1,23 +1,32 @@
-# Cartographie des modes — protocole
+# Cartographie des modes — Doris 2000 W
 
-Lecture seule. Lancer `python3 scripts/map_ids.py 192.168.1.22`, puis pour chaque ligne : faire le changement sur le radiateur, attendre 2-3 s, taper le libellé.
+Établie le 2026-11-13 : relevés en lecture (`scripts/map_ids.py`) pendant des changements faits à la main, puis chaque ID validé par une écriture (`CMD 3`, `SN 13`, clé `VIU`) relue derrière.
 
-Partir du mode programme, consigne 20 °C.
+Le Doris n'expose que marche/arrêt, consigne et boost : pas de confort / éco / hors-gel côté module. La programmation hebdomadaire (4126–4132) n'est pas gérée.
 
-| # | Action sur le radiateur | Libellé à taper | Attendu |
+## IDs validés
+
+| ID | Rôle | Valeurs | Écriture |
 |---|---|---|---|
-| 1 | Mode confort (manuel) | `confort` | id de mode + consigne active |
-| 2 | Mode éco | `eco` | même id de mode, autre valeur ; consigne → éco |
-| 3 | Hors-gel | `hors-gel` | id de mode ; consigne 7 °C ? |
-| 4 | Boost | `boost` | id boost / durée (4138 = 120 ?) |
-| 5 | Arrêt | `arret` | marche/arrêt |
-| 6 | Marche | `marche` | retour |
-| 7 | Retour programme | `programme` | id de mode = valeur initiale |
-| 8 | Consigne éco −1 °C (si réglable) | `eco-1` | id consigne éco |
-| 9 | Consigne confort +1 °C | `confort+1` | 4120/4135/4141 ? |
+| 4015 | Marche / arrêt | 4 = marche, 0 = arrêt | ✅ commande l'arrêt et la remise en marche |
+| 4030, 4083 | Miroirs de 4015 | 4 / 0 | ⚠️ écrire 4030 = 0 n'éteint pas : ça annule seulement le boost en cours |
+| 4118 | Consigne (`VIS`) | centièmes de °C | ✅ |
+| 4044 | Boost | 1 = lancer, 0 = arrêter | ✅ effet immédiat |
+| 4045 | Type de boost | 0 = serviette seule, 1 = serviette + ventilation | ✅ pris en compte à chaud |
+| 4046 | Durée du boost | minutes, paliers de 5 | ✅ lue **au lancement** seulement : la changer pendant un boost ne décale pas la fin ; relancer (4044 = 0 puis 1) pour l'appliquer |
+| 4048 | Fin du boost | horodatage, 0 hors boost | lecture seule : calculé par le radiateur (l'écrire ne lance rien) |
 
-Candidats repérés dans le bloc 4000 (valeurs le 2026-11-12, mode programme, 20 °C) :
-4020=40, 4021=2, 4023=1, 4026=2, 4027=9, 4030=4, 4105=18, 4106=10, 4107=20,
-4108=35, 4123=1, 4124=42, 4125=6, 4133=15, 4134=60, 4138=120, 4142=50.
+4048 contient l'heure **locale** encodée comme un epoch UTC : 1794571834 = 2026-11-13 12:10:34 heure de Paris. Éteindre le radiateur coupe le boost en cours.
 
-Ensuite : vérifier par une écriture test (avec accord) que l'id de mode s'écrit avec sa clé typée, puis renseigner `PRESET_MAP` et `POWER_MAP` dans `const.py` (le reste est déjà câblé et testé).
+## Autres IDs observés
+
+| ID | Comportement |
+|---|---|
+| 4039, 4090 | Passent à 1 avec le boost ; 4090 passe aussi à 1 sur toute action manuelle (dérogation), y compris à l'arrêt |
+| 8504 / 8524 | Sorties serviette / ventilation (1 = active) |
+| 8503, 4091 | Puissance demandée (%, ×100 pour 4091) : sortie de régulation, pas un état de boost |
+| 4047 | 30, inchangé dans tous les relevés : rôle inconnu |
+
+## Refaire une cartographie
+
+Lecture seule. Lancer `python3 scripts/map_ids.py 192.168.1.22`, puis pour chaque changement fait sur le radiateur : attendre 2-3 s et taper un libellé. Les IDs qui ont changé s'affichent et tout est journalisé dans `mapping-<horodatage>.jsonl`. Le module ne traite qu'une requête à la fois (~0,4 s) : un balayage complet des blocs prend plus de 2 min.

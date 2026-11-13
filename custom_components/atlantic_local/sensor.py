@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -30,7 +31,7 @@ PARALLEL_UPDATES = 0
 class AtlanticSensorDescription(SensorEntityDescription):
     """Describe one sensor read from the coordinator state."""
 
-    value_fn: Callable[[AtlanticState], float | int | None]
+    value_fn: Callable[[AtlanticState], float | int | datetime | None]
 
 
 SENSORS: tuple[AtlanticSensorDescription, ...] = (
@@ -63,6 +64,12 @@ SENSORS: tuple[AtlanticSensorDescription, ...] = (
         entity_registry_enabled_default=False,
         value_fn=lambda state: state.wifi_rssi,
     ),
+    AtlanticSensorDescription(
+        key="boost_end",
+        translation_key="boost_end",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        value_fn=lambda state: state.boost_end,
+    ),
 )
 
 
@@ -93,6 +100,6 @@ class AtlanticLocalSensor(AtlanticLocalEntity, SensorEntity):
         self.entity_description = description
 
     @property
-    def native_value(self) -> float | int | None:
+    def native_value(self) -> float | int | datetime | None:
         """Return the current value."""
         return self.entity_description.value_fn(self.coordinator.data)

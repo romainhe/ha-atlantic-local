@@ -9,11 +9,11 @@ Testée sur un sèche-serviettes **Doris 2000 W** (`TRI TD1W`, firmware module `
 
 ## État / Statut
 
-Version actuelle : **v0.1** (travail en cours).
+Version actuelle : **v0.2**.
 
-- ✅ **Fonctionne** — entité `climate` : lecture et **écriture de la consigne** en local (ID 4118), température ambiante (4104), bornes min/max. Config par IP, traduit FR/EN, 20 tests, CI verte. Contrôle fiable de la consigne sans cloud, contourne le bug Cozytouch #186.
-- 🚧 **Codé mais inactif (en attente des IDs)** — modes marche/arrêt, confort, éco, boost, hors-gel et programme. Déjà câblés dans l'entité ; ils s'activent dès que `PRESET_MAP` et `POWER_MAP` sont renseignés dans `const.py`. Tant qu'ils valent `None`, seul le chauffage avec consigne est exposé. Cartographie des IDs : [`docs/mapping-modes.md`](docs/mapping-modes.md) + `scripts/map_ids.py` (lecture seule) → **v0.2**.
-- ⬜ **À faire** — fixer l'IP du module par un bail DHCP statique sur la box ; installation via HACS et test d'écriture de bout en bout dans Home Assistant.
+- ✅ **Fonctionne** — consigne (ID 4118), marche/arrêt (4015), boost avec type (serviette seule ou + ventilation) et durée réglables, heure de fin du boost. Tous les IDs ont été validés par écriture sur le radiateur. Config par IP, traduit FR/EN, CI verte. Contrôle sans cloud, contourne le bug Cozytouch #186.
+- ⬜ **Non géré** — programmation hebdomadaire (IDs 4126–4132 lus mais non exposés).
+- ⬜ **À faire** — fixer l'IP du module par un bail DHCP statique sur la box ; installation via HACS et test de bout en bout dans Home Assistant.
 
 ## Installation
 
@@ -37,12 +37,19 @@ L'intervalle d'interrogation (30 s par défaut) se règle dans **Configurer**.
 
 | Entité | Source |
 |---|---|
-| `climate` — consigne (lecture / écriture), température ambiante, bornes min/max | IDs 4118, 4104, 4110, 4111 |
+| `climate` — consigne, température ambiante, bornes min/max | IDs 4118, 4104, 4110, 4111 |
+| `climate` — modes Chauffe / Arrêt | ID 4015 (4 = marche, 0 = arrêt) |
+| `climate` — preset Boost / Aucun | ID 4044 (1 = lancer, 0 = arrêter) |
+| `select` Type de boost — Serviette / Serviette + ventilation (configuration) | ID 4045 |
+| `number` Durée du boost, 5 à 60 min par pas de 5 (configuration) | ID 4046 |
+| `sensor` Fin du boost (horodatage, inconnu hors boost) | ID 4048 |
 | `sensor` Température ambiante | ID 4104 |
 | `sensor` Température interne (diagnostic) | ID 4103 |
 | `sensor` Signal Wi-Fi (diagnostic, désactivé par défaut) | ID 822 |
 
-Les modes (marche/arrêt, confort, éco, boost, hors-gel, programme) sont gérés par le code mais leurs IDs ne sont pas encore cartographiés : tant que `PRESET_MAP` et `POWER_MAP` valent `None` dans `const.py`, seul le mode chauffage avec consigne est exposé. Protocole de cartographie : [`docs/mapping-modes.md`](docs/mapping-modes.md), outil : `scripts/map_ids.py` (lecture seule).
+La durée du boost n'est lue par le radiateur qu'au lancement : la modifier pendant un boost ne change pas son heure de fin. Pour l'appliquer tout de suite, repasser le preset sur Aucun puis Boost. Le type, lui, s'applique à chaud. Éteindre le radiateur coupe le boost en cours.
+
+Cartographie complète et pièges : [`docs/mapping-modes.md`](docs/mapping-modes.md).
 
 ## Protocole
 
@@ -81,7 +88,12 @@ Les températures sont en centièmes de degré. Les IDs locaux n'ont rien à voi
 | 50 / 51 | Code produit / modèle |
 | 503 | Firmware du module |
 | 822 | RSSI Wi-Fi (dBm) |
+| 4015 | Marche / arrêt (4 / 0) — 4030 et 4083 en sont des miroirs, à ne pas écrire |
 | 4019 | Nom de la pièce |
+| 4044 | Boost (1 / 0) |
+| 4045 | Type de boost (0 serviette, 1 + ventilation) |
+| 4046 | Durée du boost (min) |
+| 4048 | Fin du boost (heure locale encodée en epoch UTC) |
 | 4081, 4082 | Suivent la consigne |
 | 4103 | Température interne |
 | 4104, 4109 | Température ambiante |

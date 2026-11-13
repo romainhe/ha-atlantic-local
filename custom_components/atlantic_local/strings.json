@@ -41,14 +41,24 @@
         "state_attributes": {
           "preset_mode": {
             "state": {
-              "comfort": "Comfort",
-              "eco": "Eco",
-              "boost": "Boost",
-              "frost_protection": "Frost protection",
-              "program": "Program",
-              "away": "Away"
+              "none": "None",
+              "boost": "Boost"
             }
           }
+        }
+      }
+    },
+    "number": {
+      "boost_duration": {
+        "name": "Boost duration"
+      }
+    },
+    "select": {
+      "boost_type": {
+        "name": "Boost type",
+        "state": {
+          "towel": "Towel rail",
+          "towel_fan": "Towel rail + fan"
         }
       }
     },
@@ -61,12 +71,15 @@
       },
       "wifi_rssi": {
         "name": "Wi-Fi signal"
+      },
+      "boost_end": {
+        "name": "Boost end"
       }
     }
   },
   "exceptions": {
     "write_failed": {
-      "message": "The heater refused the new setpoint: {error}"
+      "message": "The heater refused the command: {error}"
     },
     "mode_unsupported": {
       "message": "This mode is not mapped for this heater yet."

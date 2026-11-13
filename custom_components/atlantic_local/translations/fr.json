@@ -41,14 +41,24 @@
         "state_attributes": {
           "preset_mode": {
             "state": {
-              "comfort": "Confort",
-              "eco": "Éco",
-              "boost": "Boost",
-              "frost_protection": "Hors-gel",
-              "program": "Programme",
-              "away": "Absence"
+              "none": "Aucun",
+              "boost": "Boost"
             }
           }
+        }
+      }
+    },
+    "number": {
+      "boost_duration": {
+        "name": "Durée du boost"
+      }
+    },
+    "select": {
+      "boost_type": {
+        "name": "Type de boost",
+        "state": {
+          "towel": "Serviette",
+          "towel_fan": "Serviette + ventilation"
         }
       }
     },
@@ -61,12 +71,15 @@
       },
       "wifi_rssi": {
         "name": "Signal Wi-Fi"
+      },
+      "boost_end": {
+        "name": "Fin du boost"
       }
     }
   },
   "exceptions": {
     "write_failed": {
-      "message": "Le radiateur a refusé la nouvelle consigne : {error}"
+      "message": "Le radiateur a refusé la commande : {error}"
     },
     "mode_unsupported": {
       "message": "Ce mode n'est pas encore cartographié pour ce radiateur."

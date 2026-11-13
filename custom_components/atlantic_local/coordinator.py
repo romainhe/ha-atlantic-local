@@ -3,16 +3,21 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
-from datetime import timedelta
+from dataclasses import dataclass, replace
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util import dt as dt_util
 
 from .api import AtlanticLocalApi, AtlanticLocalError, DeviceIdentity, Value
 from .const import (
+    BOOST_TYPE_MAP,
     DOMAIN,
+    ID_BOOST_DURATION,
+    ID_BOOST_END,
     ID_INTERNAL_TEMPERATURE,
     ID_MAX_SETPOINT,
     ID_MIN_SETPOINT,
@@ -35,6 +40,18 @@ def centi_to_celsius(value: Value | None) -> float | None:
     return round(value / 100, 2)
 
 
+def local_epoch_to_datetime(value: Value | None) -> datetime | None:
+    """Decode the module's timestamps, 0 meaning unset.
+
+    The module stores local wall-clock time as if it were a UTC epoch, so the
+    UTC fields are kept and the local time zone attached afterwards.
+    """
+    if not isinstance(value, int) or value <= 0:
+        return None
+    wall_clock = datetime.fromtimestamp(value, UTC)
+    return wall_clock.replace(tzinfo=dt_util.get_default_time_zone())
+
+
 @dataclass(frozen=True)
 class AtlanticState:
     """One poll of the values exposed by the module."""
@@ -47,6 +64,9 @@ class AtlanticState:
     wifi_rssi: int | None
     preset: str | None = None
     power: str | None = None
+    boost_type: str | None = None
+    boost_duration: int | None = None
+    boost_end: datetime | None = None
 
     @classmethod
     def from_values(
@@ -57,6 +77,7 @@ class AtlanticState:
     ) -> AtlanticState:
         """Build a state from raw data-model values."""
         rssi = values.get(ID_WIFI_RSSI)
+        duration = values.get(ID_BOOST_DURATION)
         return cls(
             target_temperature=centi_to_celsius(values.get(ID_TARGET_TEMPERATURE)),
             room_temperature=centi_to_celsius(values.get(ID_ROOM_TEMPERATURE)),
@@ -66,6 +87,9 @@ class AtlanticState:
             wifi_rssi=rssi if isinstance(rssi, int) else None,
             preset=_lookup(preset_map, values),
             power=_lookup(power_map, values),
+            boost_type=_lookup(BOOST_TYPE_MAP, values),
+            boost_duration=duration if isinstance(duration, int) else None,
+            boost_end=local_epoch_to_datetime(values.get(ID_BOOST_END)),
         )
 
 
@@ -112,14 +136,28 @@ class AtlanticLocalCoordinator(DataUpdateCoordinator[AtlanticState]):
             raise UpdateFailed(str(err)) from err
         return AtlanticState.from_values(values, self.preset_map, self.power_map)
 
-    async def async_set_target_temperature(self, temperature: float) -> None:
-        """Write a new setpoint and refresh."""
-        await self.api.async_write(ID_TARGET_TEMPERATURE, round(temperature * 100))
+    async def _async_written(self, **changes: Any) -> None:
+        """Show an accepted write at once, then re-read in the background.
+
+        The refresh is debounced: without the immediate update a second
+        command sent within the cooldown would leave the old state displayed.
+        """
+        self.async_set_updated_data(replace(self.data, **changes))
         await self.async_request_refresh()
 
-    async def async_set_mode(self, mode_map: ModeMap, name: str) -> None:
-        """Write one named value of a mode map and refresh."""
+    async def async_set_target_temperature(self, temperature: float) -> None:
+        """Write a new setpoint."""
+        await self.api.async_write(ID_TARGET_TEMPERATURE, round(temperature * 100))
+        await self._async_written(target_temperature=temperature)
+
+    async def async_set_mode(self, mode_map: ModeMap, field: str, name: str) -> None:
+        """Write one named value of a mode map into the given state field."""
         await self.api.async_write(
             mode_map.data_id, mode_map.values[name], key=mode_map.key
         )
-        await self.async_request_refresh()
+        await self._async_written(**{field: name})
+
+    async def async_set_boost_duration(self, minutes: int) -> None:
+        """Write the boost duration, used by the next boost start."""
+        await self.api.async_write(ID_BOOST_DURATION, minutes, key="VIU")
+        await self._async_written(boost_duration=minutes)
